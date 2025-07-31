@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Mcp.Aggregators/Mcp.Aggregators.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Mcp.Aggregators.Test/Mcp.Aggregators.Test.csproj" />
+  </Folder>
+</Solution>
