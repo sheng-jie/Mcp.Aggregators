@@ -22,7 +22,8 @@ public static class McpClientTransportFactory
                 return new SseClientTransport(new SseClientTransportOptions
                 {
                     Name = $"{name}-client",
-                    Endpoint = new Uri(config.Url)
+                    Endpoint = new Uri(config.Url),
+                    TransportMode = config.Type == "sse" ? HttpTransportMode.Sse : HttpTransportMode.AutoDetect,
                 });
             }
             else

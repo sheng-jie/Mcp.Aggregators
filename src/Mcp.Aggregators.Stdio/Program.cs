@@ -11,44 +11,33 @@ var builder = Host.CreateApplicationBuilder(args);
 // Configure all logs to go to stderr (stdout is used for the MCP protocol messages).
 builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace);
 
-builder.Configuration
+// read the MCP server configuration from the args
+builder.Configuration.AddCommandLine(args);
+
+var mcpFilePath = args.FirstOrDefault(a => a.StartsWith("--mcp-file="))?.Split('=')[1];
+if (!string.IsNullOrEmpty(mcpFilePath) && File.Exists(mcpFilePath))
+{
+    builder.Configuration.AddJsonFile(mcpFilePath, optional: false, reloadOnChange: true);
+}
+else
+{
+    // Fallback to the default mcp.json in the current directory
+    builder.Configuration
     .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("mcp.json", optional: false, reloadOnChange: true);
+}
+
 
 // Register the configuration for MCP servers - bind to root since McpServerOptions expects the full JSON
 builder.Services.Configure<McpServerConfigOptions>(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<McpServerConfigOptions>, McpServerConfigOptionsValidator>();
-
-// builder.Services.AddOptions<McpServerOptions>()
-//     .Bind(builder.Configuration.GetSection("mcpServers"))
-//     .ValidateDataAnnotations()
-//     .ValidateOnStart();
 
 
 // Add the MCP services: the transport to use (stdio) and the tools to register.
 builder.Services
     .AddMcpServer()
     .WithAggregatedStdioServerTransport();
-    // .WithStdioServerTransport()
-    // .WithTools<RandomNumberTools>();
 
 var app = builder.Build();
-
-// var mcpServerOptions = app.Services.GetRequiredService<IOptions<McpServerConfigOptions>>().Value;
-
-// foreach (var serverConfig in mcpServerOptions.McpServers)
-// {
-//     var serverId = serverConfig.Key;
-//     var config = serverConfig.Value;
-
-//     // Register each MCP client wrapper with its configuration
-
-//     var clientWrapper = new McpClientWrapper(serverId, config, app.Services.GetService<ILoggerFactory>());
-
-//     await clientWrapper.InitializeAsync();
-// }
-
-
-// Run the application.
 
 await app.RunAsync();

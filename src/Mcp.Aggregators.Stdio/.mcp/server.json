@@ -1,0 +1,21 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/draft/2025-07-09/server.json",
+  "description": "An Aggregated Stdio MCP server using the MCP C# SDK.",
+  "name": "io.github.sheng-jie/Mcp.Aggregators",
+  "packages": [
+    {
+      "registry_name": "nuget",
+      "name": "Mcp.Aggregators.Stdio",
+      "version": "0.1.0",
+      "package_arguments": ["--mcp-file"],
+      "environment_variables": []
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/sheng-jie/Mcp.Aggregators",
+    "source": "github"
+  },
+  "version_detail": {
+    "version": "0.1.0"
+  }
+}

@@ -9,6 +9,12 @@ public class McpServerConfig
 {
 
     /// <summary>
+    /// if the server is enabled. Defaults to true.
+    /// Set to false to disable the server without removing it from the configuration.
+    /// </summary>
+    public bool? Enabled { get; set; } = true;
+
+    /// <summary>
     /// Type of the MCP server connection. Can be "command", "sse", or null for command type.
     /// </summary>
     [JsonPropertyName("type")]
