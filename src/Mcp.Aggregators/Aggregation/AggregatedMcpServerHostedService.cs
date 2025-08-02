@@ -21,7 +21,11 @@ internal sealed class AggregatedMcpServerHostedService(
             logger?.LogInformation("Starting Aggregated MCP Server...");
             var clientWrappers = new ConcurrentBag<McpClientWrapper>();
 
-            // 并行初始化每个 MCP 客户端
+            // 优化：预先过滤启用的服务器，减少不必要的并发任务
+            var enabledServers = mcpServerOptions.Value.McpServers
+                .Where(kv => kv.Value.Enabled.GetValueOrDefault(true))
+                .ToList();
+
             var parallelOptions = new ParallelOptions
             {
                 MaxDegreeOfParallelism = Environment.ProcessorCount,
@@ -29,22 +33,15 @@ internal sealed class AggregatedMcpServerHostedService(
             };
 
             await Parallel.ForEachAsync(
-                mcpServerOptions.Value.McpServers,
+                enabledServers,
                 parallelOptions,
                 async (serverConfig, ct) =>
                 {
                     var serverId = serverConfig.Key;
-                    // Skip disabled servers
-                    if (!serverConfig.Value.Enabled.GetValueOrDefault(true))
-                    {
-                        logger?.LogInformation($"Skipping disabled MCP server: {serverId}");
-                        return;
-                    }
                     var config = serverConfig.Value;
 
-                    // Register each MCP client wrapper with its configuration
                     var clientWrapper = new McpClientWrapper(serverId, config, loggerFactory);
-                    await clientWrapper.InitializeAsync();
+                    await clientWrapper.InitializeAsync().ConfigureAwait(false);
                     clientWrappers.Add(clientWrapper);
                 }
             ).ConfigureAwait(false);

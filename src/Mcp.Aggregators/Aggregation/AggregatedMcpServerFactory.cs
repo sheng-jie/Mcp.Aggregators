@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using Mcp.Aggregators.Configuration;
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
@@ -117,23 +118,22 @@ public class AggregatedMcpServerFactory
         {
             ListToolsHandler = async (request, cancellation) =>
             {
-                var tools = new List<Tool>();
-                foreach (var clientWrapper in _clientWrappers)
-                {
-                    var clientTools = await clientWrapper.McpClient.ListToolsAsync(cancellationToken: cancellation);
-
-                    var protocolTools = clientTools.Select(tool =>
+                var toolLists = await Task.WhenAll(
+                    _clientWrappers.Select(async clientWrapper =>
                     {
-                        var protocolTool = tool.ProtocolTool;
-                        protocolTool.Name = $"{clientWrapper.Name}.{tool.ProtocolTool.Name}";
-                        return protocolTool;
-                    });
-                    tools.AddRange(protocolTools);
-                }
+                        var clientTools = await clientWrapper.McpClient.ListToolsAsync(cancellationToken: cancellation);
+                        return clientTools.Select(tool =>
+                        {
+                            var protocolTool = tool.ProtocolTool;
+                            protocolTool.Name = $"{clientWrapper.Name}.{protocolTool.Name}";
+                            return protocolTool;
+                        });
+                    })
+                ).ConfigureAwait(false);
 
                 return new ListToolsResult
                 {
-                    Tools = tools
+                    Tools = toolLists.SelectMany(t => t).ToList()
                 };
             },
 
