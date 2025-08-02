@@ -1,11 +1,13 @@
+[简体中文](README.zh-CN.md) | [English](README.md)
+
 # MCP Aggregators
 This repository contains a collection of Model Context Protocol (MCP) aggregators that utilize the MCP C# SDK. These aggregators are designed to facilitate the integration and management of multiple MCP servers, allowing for streamlined data processing and interaction.
-# MCP Aggregators Stdio
-This specific aggregator is a standard input/output (stdio) based MCP server that leverages the MCP C# SDK to provide a simple and effective way to interact with MCP models through command line interfaces.
-
 # Usage
 
 ## Run as Stdio Server
+
+This specific aggregator is a standard input/output (stdio) based MCP server that leverages the MCP C# SDK to provide a simple and effective way to interact with MCP models through command line interfaces.
+
 To use the MCP Aggregators Stdio, you can run the server with the following command:
 ```bash
 dnx Mcp.Aggregators.Stdio --mcp-file=path/to/mcp.json --yes
