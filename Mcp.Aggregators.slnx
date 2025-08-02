@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/samples/" />
   <Folder Name="/src/">
+    <Project Path="src/Mcp.Aggregators.Http/Mcp.Aggregators.Http.csproj" />
     <Project Path="src/Mcp.Aggregators.Stdio/Mcp.Aggregators.Stdio.csproj" />
     <Project Path="src/Mcp.Aggregators/Mcp.Aggregators.csproj" />
   </Folder>

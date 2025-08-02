@@ -7,6 +7,21 @@ namespace Mcp.Aggregators.Aggregation;
 
 public static class AggregatedMcpServerBuilderExtensions
 {
+
+    public static IMcpServerBuilder WithAggregatedHttpServerTransport(this IMcpServerBuilder builder)
+    {
+        Throw.IfNull(builder);
+
+        builder.Services.TryAddSingleton<McpClientsFactory>();
+        builder.Services.TryAddSingleton<McpToolsHandler>();
+
+        builder.WithHttpTransport();
+
+        builder.ConfigureHandlers();
+
+        return builder;
+    }
+
     public static IMcpServerBuilder WithAggregatedStdioServerTransport(this IMcpServerBuilder builder)
     {
         Throw.IfNull(builder);
@@ -14,8 +29,16 @@ public static class AggregatedMcpServerBuilderExtensions
         builder.Services.AddSingleton<McpClientsFactory>();
         builder.Services.AddSingleton<McpToolsHandler>();
 
-        builder.WithStdioServerTransport()
-        .WithListToolsHandler(
+        builder.WithStdioServerTransport();
+        builder.ConfigureHandlers();
+
+        return builder;
+    }
+    
+
+    private static void ConfigureHandlers(this IMcpServerBuilder builder)
+    {
+        builder.WithListToolsHandler(
             async (context, stoppingToken) =>
             {
                 if (context.Services is null)
@@ -31,8 +54,6 @@ public static class AggregatedMcpServerBuilderExtensions
             var mcpToolsHandler = context.Services.GetRequiredService<McpToolsHandler>();
             return await mcpToolsHandler.CallAggregatedToolAsync(context, cancellationToken);
         });
-
-        return builder;
     }
 }
 
