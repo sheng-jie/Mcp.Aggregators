@@ -14,16 +14,12 @@ public class McpClientWrapper
     private readonly IClientTransport _clientTransport;
     public IMcpClient McpClient { get; private set; }
     private readonly ILogger<McpClientWrapper>? _logger;
-    private readonly Dictionary<string, TaskCompletionSource<string>> _initializationRequests;
 
     public McpClientWrapper(string name, McpServerConfig config, ILoggerFactory? loggerFactory = null)
     {
         Name = name ?? throw new ArgumentNullException(nameof(name));
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = loggerFactory?.CreateLogger<McpClientWrapper>();
-        _initializationRequests = new Dictionary<string, TaskCompletionSource<string>>();
-
-        // 创建对应的传输客户端
 
         _clientTransport = McpClientTransportFactory.Create(name, config);
 

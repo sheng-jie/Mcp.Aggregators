@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 
-internal sealed class AggregatedMcpServerHostedService(
-    IOptions<McpServerConfigOptions> mcpServerOptions,
+[Obsolete("This class is obsolete and will be removed in a future version.")]
+internal sealed class AggregatedMcpServerHostedService(McpClientsFactory mcpClientsFactory,
     ILoggerFactory loggerFactory,
     IHostApplicationLifetime? lifetime = null) : BackgroundService
 {
@@ -19,32 +19,8 @@ internal sealed class AggregatedMcpServerHostedService(
         try
         {
             logger?.LogInformation("Starting Aggregated MCP Server...");
-            var clientWrappers = new ConcurrentBag<McpClientWrapper>();
 
-            // 优化：预先过滤启用的服务器，减少不必要的并发任务
-            var enabledServers = mcpServerOptions.Value.McpServers
-                .Where(kv => kv.Value.Enabled.GetValueOrDefault(true))
-                .ToList();
-
-            var parallelOptions = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount,
-                CancellationToken = stoppingToken
-            };
-
-            await Parallel.ForEachAsync(
-                enabledServers,
-                parallelOptions,
-                async (serverConfig, ct) =>
-                {
-                    var serverId = serverConfig.Key;
-                    var config = serverConfig.Value;
-
-                    var clientWrapper = new McpClientWrapper(serverId, config, loggerFactory);
-                    await clientWrapper.InitializeAsync().ConfigureAwait(false);
-                    clientWrappers.Add(clientWrapper);
-                }
-            ).ConfigureAwait(false);
+            var clientWrappers = await mcpClientsFactory.GetOrCreateClientsAsync(stoppingToken).ConfigureAwait(false);
 
             var factory = new AggregatedMcpServerFactory(clientWrappers);
             var server = factory.CreateAggregatedServer();

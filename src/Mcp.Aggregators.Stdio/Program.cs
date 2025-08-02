@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Mcp.Aggregators.Aggregation;
+using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Client;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -27,15 +29,12 @@ else
     .AddJsonFile("mcp.json", optional: false, reloadOnChange: true);
 }
 
-
 // Register the configuration for MCP servers - bind to root since McpServerOptions expects the full JSON
 builder.Services.Configure<McpServerConfigOptions>(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<McpServerConfigOptions>, McpServerConfigOptionsValidator>();
 
 
-// Add the MCP services: the transport to use (stdio) and the tools to register.
-builder.Services
-    .AddMcpServer()
+builder.Services.AddMcpServer()
     .WithAggregatedStdioServerTransport();
 
 var app = builder.Build();
